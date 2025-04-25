@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,21 +37,26 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-orange-50 via-seva-50/50 to-orange-50/80">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#E5DEFF] via-[#D3E4FD]/50 to-[#F0F4FF] relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-purple-200/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-200/30 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+
       <Navbar />
-      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-md w-full">
-          <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] animate-fade-in transform hover:translate-y-[-4px] transition-all duration-300">
+          <div className="bg-white/70 backdrop-blur-lg border border-white/20 p-8 rounded-2xl shadow-2xl shadow-purple-100/50 animate-fade-in transform hover:scale-[1.02] transition-all duration-300">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-seva-500 to-orange-400 mb-4 transform hover:rotate-12 transition-transform duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-blue-400 mb-4 transform hover:rotate-12 transition-transform duration-300">
                 <LogIn className="text-white" size={32} />
               </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-seva-600 to-orange-600 bg-clip-text text-transparent mb-2">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
                 Welcome Back
               </h2>
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
-                <Link to="/register" className="font-medium text-seva-500 hover:text-seva-600 transition-colors underline-offset-4 hover:underline">
+                <Link to="/register" className="font-medium text-purple-500 hover:text-purple-600 transition-colors underline-offset-4 hover:underline">
                   Sign up now
                 </Link>
               </p>
@@ -129,7 +133,7 @@ const Login = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-seva-500 to-orange-500 hover:from-seva-600 hover:to-orange-600 transform active:scale-95 transition-all duration-200"
+                className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transform active:scale-95 transition-all duration-200 text-white"
                 disabled={isLoading}
               >
                 <LogIn className="mr-2" size={18} />
@@ -145,4 +149,3 @@ const Login = () => {
 };
 
 export default Login;
-

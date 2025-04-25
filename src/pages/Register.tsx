@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,18 +41,24 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-seva-50 to-orange-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#F0F4FF] via-[#D3E4FD]/50 to-[#E5DEFF] relative overflow-hidden">
+      {/* Floating Shapes for Creative Background */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-purple-200/30 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-blue-200/30 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+
       <Navbar />
-      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-md w-full space-y-8">
-          <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl animate-fade-in">
+          <div className="bg-white/70 backdrop-blur-lg border border-white/20 p-8 rounded-2xl shadow-2xl shadow-purple-100/50 animate-fade-in">
             <div className="text-center">
-              <h2 className="text-3xl font-extrabold text-gray-900 mb-2">
+              <h2 className="text-3xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
                 Create Your Account
               </h2>
               <p className="text-sm text-gray-600">
                 Already have an account?{" "}
-                <Link to="/login" className="font-medium text-seva-500 hover:text-seva-600 transition-colors">
+                <Link to="/login" className="font-medium text-purple-500 hover:text-purple-600 transition-colors">
                   Log in
                 </Link>
               </p>
@@ -176,7 +181,7 @@ const Register = () => {
 
               <Button
                 type="submit"
-                className="w-full bg-seva-500 hover:bg-seva-600 transition-all transform active:scale-95"
+                className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 transition-all transform active:scale-95 text-white"
                 disabled={isLoading}
               >
                 <UserPlus className="mr-2" size={18} />
