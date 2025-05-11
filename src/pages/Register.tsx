@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,38 +7,74 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
 import { Eye, EyeOff, UserPlus, Mail, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Register = () => {
-  const [name, setName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    // Redirect if already logged in
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !password || !confirmPassword) {
+    // Basic form validation
+    if (!fullName || !email || !password) {
       toast.error("Please fill in all fields");
       return;
     }
     
     if (password !== confirmPassword) {
-      toast.error("Passwords don't match");
+      toast.error("Passwords do not match");
+      return;
+    }
+    
+    if (password.length < 6) {
+      toast.error("Password should be at least 6 characters");
       return;
     }
     
     setIsLoading(true);
     
-    // Simulating registration for demo purposes
-    setTimeout(() => {
-      toast.success("Account created successfully!");
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName,
+          },
+        },
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success("Registration successful! Please verify your email to complete the process.");
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
       setIsLoading(false);
-      navigate("/login");
-    }, 1500);
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -53,28 +89,27 @@ const Register = () => {
             <p className="mt-2 text-center text-sm text-gray-600">
               Or{" "}
               <Link to="/login" className="font-medium text-seva-500 hover:text-seva-600">
-                sign in to your account
+                sign in to your existing account
               </Link>
             </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm space-y-4">
+            <div className="rounded-md shadow-sm -space-y-px">
               <div>
-                <label htmlFor="name" className="sr-only">
+                <label htmlFor="fullName" className="sr-only">
                   Full Name
                 </label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                   <Input
-                    id="name"
-                    name="name"
+                    id="fullName"
+                    name="fullName"
                     type="text"
-                    autoComplete="name"
                     required
-                    className="pl-10"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Full name"
+                    className="pl-10 mb-4"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Full Name"
                   />
                 </div>
               </div>
@@ -90,7 +125,7 @@ const Register = () => {
                     type="email"
                     autoComplete="email"
                     required
-                    className="pl-10"
+                    className="pl-10 mb-4"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email address"
@@ -108,14 +143,14 @@ const Register = () => {
                     type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     required
-                    className="pr-10"
+                    className="pr-10 mb-4"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={togglePasswordVisibility}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -130,43 +165,23 @@ const Register = () => {
                   <Input
                     id="confirmPassword"
                     name="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
+                    type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     required
                     className="pr-10"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm password"
+                    placeholder="Confirm Password"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={togglePasswordVisibility}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
-                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                id="terms"
-                name="terms"
-                type="checkbox"
-                className="h-4 w-4 text-seva-500 focus:ring-seva-500 border-gray-300 rounded"
-                required
-              />
-              <label htmlFor="terms" className="ml-2 block text-sm text-gray-900">
-                I agree to the{" "}
-                <a href="#" className="font-medium text-seva-500 hover:text-seva-600">
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a href="#" className="font-medium text-seva-500 hover:text-seva-600">
-                  Privacy Policy
-                </a>
-              </label>
             </div>
 
             <div>
@@ -176,8 +191,15 @@ const Register = () => {
                 disabled={isLoading}
               >
                 <UserPlus className="mr-2" size={18} />
-                {isLoading ? "Creating account..." : "Create account"}
+                {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
+            </div>
+            
+            <div className="text-center text-sm text-gray-600">
+              By signing up, you agree to our{" "}
+              <a href="#" className="text-seva-500 hover:text-seva-600">Terms of Service</a>
+              {" "}and{" "}
+              <a href="#" className="text-seva-500 hover:text-seva-600">Privacy Policy</a>
             </div>
           </form>
         </div>

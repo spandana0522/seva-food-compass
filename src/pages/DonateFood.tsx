@@ -1,6 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Utensils, MapPin, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -12,9 +13,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Define the form schema
 const donationFormSchema = z.object({
@@ -32,6 +33,7 @@ type DonationFormValues = z.infer<typeof donationFormSchema>;
 const DonateFood = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
   
   const form = useForm<DonationFormValues>({
     resolver: zodResolver(donationFormSchema),
@@ -46,28 +48,40 @@ const DonateFood = () => {
     },
   });
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      toast.error("You must be logged in to donate food");
+      navigate("/login");
+    }
+  }, [user, loading, navigate]);
+
   const onSubmit = async (values: DonationFormValues) => {
+    if (!user) {
+      toast.error("You must be logged in to donate food");
+      navigate("/login");
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
-      // Check if the user is authenticated
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        toast.error("You must be logged in to donate food");
-        navigate("/login");
-        return;
-      }
-      
       // Format the data for submission
       const donationData = {
-        ...values,
-        user_id: session.user.id,
+        user_id: user.id,
+        food_name: values.food_name,
+        food_type: values.food_type,
+        quantity: values.quantity, // This is now a number after the transformation
+        description: values.description || null,
         expiry_date: values.expiry_date || null,
+        pickup_location: values.pickup_location,
+        pickup_instructions: values.pickup_instructions || null,
       };
       
       // Submit the donation to Supabase
-      const { error } = await supabase.from("food_donations").insert(donationData);
+      const { error } = await supabase
+        .from("food_donations")
+        .insert(donationData);
       
       if (error) {
         console.error("Error submitting donation:", error);
@@ -94,6 +108,19 @@ const DonateFood = () => {
     { value: "dry_goods", label: "Dry Goods" },
     { value: "other", label: "Other" },
   ];
+
+  // If loading, show a loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <div className="container mx-auto flex-grow flex justify-center items-center">
+          <p className="text-xl">Loading...</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
