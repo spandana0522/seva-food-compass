@@ -21,7 +21,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const donationFormSchema = z.object({
   food_name: z.string().min(1, "Food name is required"),
   food_type: z.enum(["fresh_produce", "canned_goods", "baked_goods", "cooked_meals", "beverages", "dry_goods", "other"]),
-  quantity: z.string().transform(val => parseInt(val, 10)).refine(val => !isNaN(val) && val > 0, "Quantity must be a positive number"),
+  quantity: z.coerce.number().positive("Quantity must be a positive number"), // Changed to coerce.number()
   description: z.string().optional(),
   expiry_date: z.string().optional(),
   pickup_location: z.string().min(1, "Pickup location is required"),
@@ -40,7 +40,7 @@ const DonateFood = () => {
     defaultValues: {
       food_name: "",
       food_type: "fresh_produce",
-      quantity: "1",
+      quantity: 1, // Changed to number
       description: "",
       expiry_date: "",
       pickup_location: "",
@@ -71,7 +71,7 @@ const DonateFood = () => {
         user_id: user.id,
         food_name: values.food_name,
         food_type: values.food_type,
-        quantity: values.quantity, // This is now a number after the transformation
+        quantity: values.quantity, // This is now a number 
         description: values.description || null,
         expiry_date: values.expiry_date || null,
         pickup_location: values.pickup_location,
