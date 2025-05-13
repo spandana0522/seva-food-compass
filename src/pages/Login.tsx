@@ -9,12 +9,14 @@ import { toast } from "sonner";
 import { Eye, EyeOff, LogIn, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Alert } from "@/components/ui/alert";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -23,33 +25,67 @@ const Login = () => {
     if (user) {
       navigate("/");
     }
+    
+    // Check auth from URL on page load (for when redirected back from email verification)
+    const checkHashParams = async () => {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      
+      if (accessToken && refreshToken) {
+        try {
+          const { data, error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          
+          if (error) {
+            console.error("Error setting session:", error);
+            toast.error("Failed to complete login");
+          } else if (data.user) {
+            toast.success("Login successful!");
+            navigate("/");
+          }
+        } catch (err) {
+          console.error("Error during session recovery:", err);
+        }
+      }
+    };
+    
+    checkHashParams();
   }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
     
     if (!email || !password) {
-      toast.error("Please fill in all fields");
+      setErrorMessage("Please fill in all fields");
       return;
     }
     
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
       
       if (error) {
-        toast.error(error.message);
-      } else {
+        console.error("Login error:", error);
+        if (error.message.includes("Invalid login")) {
+          setErrorMessage("Invalid email or password. Please check your credentials and try again.");
+        } else {
+          setErrorMessage(error.message || "Login failed. Please try again.");
+        }
+      } else if (data.user) {
         toast.success("Login successful!");
         navigate("/");
       }
     } catch (error) {
-      console.error("Login error:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      console.error("Unexpected login error:", error);
+      setErrorMessage("An unexpected error occurred. Please try again later.");
     } finally {
       setIsLoading(false);
     }
@@ -75,6 +111,13 @@ const Login = () => {
               </Link>
             </p>
           </div>
+
+          {errorMessage && (
+            <div className="rounded-md bg-red-50 p-4 border border-red-200">
+              <p className="text-sm text-red-700">{errorMessage}</p>
+            </div>
+          )}
+          
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="rounded-md shadow-sm -space-y-px">
               <div>
@@ -152,6 +195,13 @@ const Login = () => {
                 <LogIn className="mr-2" size={18} />
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>
+            </div>
+            
+            <div className="text-center text-sm text-gray-600">
+              Don't have an account?{" "}
+              <Link to="/register" className="font-medium text-seva-500 hover:text-seva-600">
+                Sign up now
+              </Link>
             </div>
           </form>
         </div>
