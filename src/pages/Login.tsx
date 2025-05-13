@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Eye, EyeOff, LogIn, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Alert } from "@/components/ui/alert";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -34,6 +33,7 @@ const Login = () => {
       
       if (accessToken && refreshToken) {
         try {
+          console.log("Found tokens in URL, setting session...");
           const { data, error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
@@ -43,6 +43,7 @@ const Login = () => {
             console.error("Error setting session:", error);
             toast.error("Failed to complete login");
           } else if (data.user) {
+            console.log("Session set successfully");
             toast.success("Login successful!");
             navigate("/");
           }
@@ -67,6 +68,7 @@ const Login = () => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting login with:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -76,10 +78,13 @@ const Login = () => {
         console.error("Login error:", error);
         if (error.message.includes("Invalid login")) {
           setErrorMessage("Invalid email or password. Please check your credentials and try again.");
+        } else if (error.message.includes("Email not confirmed")) {
+          setErrorMessage("Please verify your email address before logging in.");
         } else {
           setErrorMessage(error.message || "Login failed. Please try again.");
         }
       } else if (data.user) {
+        console.log("Login successful for:", data.user.email);
         toast.success("Login successful!");
         navigate("/");
       }
@@ -192,8 +197,17 @@ const Login = () => {
                 className="w-full flex justify-center items-center bg-seva-500 hover:bg-seva-600"
                 disabled={isLoading}
               >
-                <LogIn className="mr-2" size={18} />
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Signing in...
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="mr-2" size={18} />
+                    Sign in
+                  </>
+                )}
               </Button>
             </div>
             

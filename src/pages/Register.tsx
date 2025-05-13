@@ -17,6 +17,7 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -29,27 +30,29 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
     
     // Basic form validation
     if (!fullName || !email || !password) {
-      toast.error("Please fill in all fields");
+      setErrorMessage("Please fill in all fields");
       return;
     }
     
     if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
+      setErrorMessage("Passwords do not match");
       return;
     }
     
     if (password.length < 6) {
-      toast.error("Password should be at least 6 characters");
+      setErrorMessage("Password should be at least 6 characters");
       return;
     }
     
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
+      console.log("Attempting registration for:", email);
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -60,14 +63,24 @@ const Register = () => {
       });
       
       if (error) {
-        toast.error(error.message);
-      } else {
-        toast.success("Registration successful! Please verify your email to complete the process.");
-        navigate("/login");
+        console.error("Registration error:", error);
+        if (error.message.includes("User already registered")) {
+          setErrorMessage("This email is already registered. Try logging in instead.");
+        } else {
+          setErrorMessage(error.message || "Registration failed. Please try again.");
+        }
+      } else if (data.user) {
+        console.log("Registration successful for:", data.user.email);
+        if (data.user.identities?.length === 0) {
+          setErrorMessage("This email is already registered. Try logging in instead.");
+        } else {
+          toast.success("Registration successful! Please verify your email to complete the process.");
+          navigate("/login");
+        }
       }
     } catch (error) {
-      console.error("Registration error:", error);
-      toast.error("An unexpected error occurred. Please try again.");
+      console.error("Unexpected registration error:", error);
+      setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -93,6 +106,13 @@ const Register = () => {
               </Link>
             </p>
           </div>
+          
+          {errorMessage && (
+            <div className="rounded-md bg-red-50 p-4 border border-red-200">
+              <p className="text-sm text-red-700">{errorMessage}</p>
+            </div>
+          )}
+          
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="rounded-md shadow-sm -space-y-px">
               <div>
@@ -190,8 +210,17 @@ const Register = () => {
                 className="w-full flex justify-center items-center bg-seva-500 hover:bg-seva-600"
                 disabled={isLoading}
               >
-                <UserPlus className="mr-2" size={18} />
-                {isLoading ? "Creating Account..." : "Create Account"}
+                {isLoading ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Creating Account...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="mr-2" size={18} />
+                    Create Account
+                  </>
+                )}
               </Button>
             </div>
             

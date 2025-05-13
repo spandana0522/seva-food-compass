@@ -26,13 +26,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("AuthProvider initializing");
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        console.log("Auth state changed:", _event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession?.user?.email);
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
         setLoading(false);
+        
+        // Show toast notifications for login/logout events
+        if (event === 'SIGNED_IN') {
+          toast.success(`Welcome, ${currentSession?.user?.email?.split('@')[0] || 'User'}!`);
+        } else if (event === 'SIGNED_OUT') {
+          toast.info("You have been signed out");
+        } else if (event === 'PASSWORD_RECOVERY') {
+          toast.info("Password recovery initiated");
+        } else if (event === 'USER_UPDATED') {
+          toast.success("Your profile has been updated");
+        }
       }
     );
 
@@ -40,10 +53,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const getInitialSession = async () => {
       try {
         console.log("Getting initial session");
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log("Initial session:", session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        console.log("Initial session:", initialSession?.user?.email || "No session");
+        setSession(initialSession);
+        setUser(initialSession?.user ?? null);
       } catch (error) {
         console.error("Error getting initial session:", error);
       } finally {
@@ -54,14 +67,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     getInitialSession();
 
     return () => {
+      console.log("Unsubscribing from auth events");
       subscription.unsubscribe();
     };
   }, []);
 
   const signOut = async () => {
     try {
+      console.log("Signing out...");
       await supabase.auth.signOut();
-      toast.success("You have been signed out");
       navigate("/login");
     } catch (error) {
       console.error("Error signing out:", error);
