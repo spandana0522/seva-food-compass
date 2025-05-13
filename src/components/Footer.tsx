@@ -10,9 +10,9 @@ const Footer = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <span className="h-8 w-8 rounded-full bg-seva-500 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
+                <span className="text-white font-bold text-lg">A</span>
               </span>
-              <span className="font-bold text-xl text-gray-800">Seva<span className="text-seva-500">Compass</span></span>
+              <span className="font-bold text-xl text-gray-800">Anna<span className="text-seva-500">purna</span></span>
             </div>
             <p className="text-gray-600 mb-4">Connecting food donors with those in need, reducing waste and fighting hunger in our communities.</p>
             <div className="flex space-x-4">
@@ -25,7 +25,7 @@ const Footer = () => {
               <a href="#" aria-label="Twitter" className="text-gray-600 hover:text-seva-500">
                 <Twitter size={20} />
               </a>
-              <a href="mailto:contact@sevafoodcompass.org" aria-label="Email" className="text-gray-600 hover:text-seva-500">
+              <a href="mailto:contact@annapurna.org" aria-label="Email" className="text-gray-600 hover:text-seva-500">
                 <Mail size={20} />
               </a>
             </div>
@@ -54,7 +54,7 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold text-lg mb-4">Contact</h3>
             <ul className="space-y-2">
-              <li className="text-gray-600">contact@sevafoodcompass.org</li>
+              <li className="text-gray-600">contact@annapurna.org</li>
               <li className="text-gray-600">+1 (555) 123-4567</li>
               <li className="text-gray-600">123 Sharing Street, Kindness City, CA 94123</li>
             </ul>
@@ -63,7 +63,7 @@ const Footer = () => {
         
         <div className="border-t border-gray-200 pt-8 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} Seva Food Compass. All rights reserved.</p>
+            <p className="text-gray-600 text-sm mb-4 md:mb-0">© {new Date().getFullYear()} Annapurna. All rights reserved.</p>
             <div className="flex space-x-6">
               <a href="#" className="text-gray-600 hover:text-seva-500 text-sm">Privacy Policy</a>
               <a href="#" className="text-gray-600 hover:text-seva-500 text-sm">Terms of Service</a>

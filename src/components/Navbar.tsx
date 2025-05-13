@@ -18,9 +18,9 @@ const Navbar = () => {
       <div className="container mx-auto px-4 md:px-6 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2">
           <span className="h-8 w-8 rounded-full bg-seva-500 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">S</span>
+            <span className="text-white font-bold text-lg">A</span>
           </span>
-          <span className="font-bold text-xl text-gray-800">Seva<span className="text-seva-500">Compass</span></span>
+          <span className="font-bold text-xl text-gray-800">Anna<span className="text-seva-500">purna</span></span>
         </Link>
         
         {/* Desktop Navigation */}

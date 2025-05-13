@@ -11,9 +11,9 @@ const AboutUs = () => {
       <Navbar />
       <div className="container mx-auto flex-grow px-4 py-8">
         <section className="mb-12">
-          <h1 className="text-4xl font-bold mb-6 text-gray-900">About SevaCompass</h1>
+          <h1 className="text-4xl font-bold mb-6 text-gray-900">About Annapurna</h1>
           <p className="text-lg text-gray-700 mb-8">
-            SevaCompass is dedicated to reducing food waste and addressing hunger by connecting 
+            Annapurna is dedicated to reducing food waste and addressing hunger by connecting 
             food donors with those who need it most. Our platform offers a simple, effective way 
             to share food resources within communities.
           </p>
@@ -22,7 +22,7 @@ const AboutUs = () => {
             <div>
               <h2 className="text-2xl font-bold mb-4 text-gray-800">Our Mission</h2>
               <p className="text-gray-700 mb-4">
-                SevaCompass aims to create a world where no food goes to waste and no one goes hungry. 
+                Annapurna aims to create a world where no food goes to waste and no one goes hungry. 
                 We believe in the power of communities coming together to solve the dual problems of 
                 food waste and food insecurity.
               </p>
@@ -94,7 +94,7 @@ const AboutUs = () => {
                   <Mail className="text-seva-600" size={24} />
                 </div>
                 <h3 className="font-semibold mb-2">Email Us</h3>
-                <p className="text-gray-600">info@sevacompass.org</p>
+                <p className="text-gray-600">info@annapurna.org</p>
               </CardContent>
             </Card>
             
@@ -123,7 +123,7 @@ const AboutUs = () => {
             <h2 className="text-2xl font-bold mb-4">Join Our Movement</h2>
             <p className="mb-6 max-w-2xl mx-auto">
               Whether you want to donate food, find food, or volunteer with us, there's a place for you 
-              in the SevaCompass community.
+              in the Annapurna community.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Button className="bg-seva-500 hover:bg-seva-600">Become a Donor</Button>
