@@ -2,16 +2,11 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { SearchIcon, MapPin, Calendar, AlertCircle, ShoppingCart, X } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
+import FoodFilters from "@/components/food/FoodFilters";
+import FoodDonationList from "@/components/food/FoodDonationList";
+import ReservationList from "@/components/food/ReservationList";
 
 // Dummy data for food donations
 const dummyFoodData = [
@@ -179,153 +174,31 @@ const FindFood = () => {
           </p>
         </section>
 
-        <div className="flex flex-col md:flex-row gap-4 mb-8">
-          <div className="relative flex-grow">
-            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <Input 
-              type="text"
-              placeholder="Search for food items..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 text-lg py-6"
-            />
-          </div>
-          <div className="w-full md:w-64">
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="text-lg py-6">
-                <SelectValue placeholder="Filter by Type" />
-              </SelectTrigger>
-              <SelectContent>
-                {foodTypeOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value} className="text-lg">
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <FoodFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          filterType={filterType}
+          setFilterType={setFilterType}
+          foodTypeOptions={foodTypeOptions}
+        />
 
-        {/* My Reservations Section */}
-        {myReservations.length > 0 && (
-          <section className="mb-10">
-            <h2 className="text-2xl font-bold mb-4">My Reservations</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {myReservations.map(reservation => {
-                const donation = donations.find(d => d.id === reservation.food_donation_id);
-                if (!donation) return null;
-                
-                return (
-                  <Card key={reservation.id}>
-                    <CardHeader className="pb-2">
-                      <CardTitle>{donation.food_name}</CardTitle>
-                      <CardDescription>Reserved on {new Date(reservation.created_at).toLocaleDateString()}</CardDescription>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <div className="space-y-2">
-                        <p><MapPin className="inline mr-1" size={16} /> {donation.pickup_location}</p>
-                        <p>Quantity: {donation.quantity}</p>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-red-300 text-red-600 hover:bg-red-50"
-                        onClick={() => handleCancelReservation(reservation.id)}
-                      >
-                        <X size={16} className="mr-2" />
-                        Cancel Reservation
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
-            </div>
-          </section>
-        )}
+        <ReservationList
+          reservations={myReservations}
+          donations={donations}
+          onCancelReservation={handleCancelReservation}
+        />
 
-        {/* Available Food Section */}
         <section>
           <h2 className="text-2xl font-bold mb-4">Available Food Items</h2>
           
-          {loading ? (
-            <div className="text-center py-12">
-              <p className="text-xl">Loading available food items...</p>
-            </div>
-          ) : filteredDonations.length === 0 ? (
-            <div className="text-center py-12 bg-gray-50 rounded-lg">
-              <AlertCircle className="mx-auto text-gray-400 mb-3" size={40} />
-              <p className="text-xl text-gray-500">No food items found matching your search.</p>
-              <p className="text-gray-500 mt-2">Try adjusting your search criteria.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDonations.map((donation) => (
-                <Card key={donation.id} className="overflow-hidden">
-                  {donation.image_url && (
-                    <AspectRatio ratio={16 / 9}>
-                      <img
-                        src={donation.image_url}
-                        alt={donation.food_name}
-                        className="w-full h-full object-cover"
-                      />
-                    </AspectRatio>
-                  )}
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <CardTitle className="text-xl">{donation.food_name}</CardTitle>
-                        <CardDescription>{donation.donor_name}</CardDescription>
-                      </div>
-                      <Badge variant="outline" className="bg-seva-50 text-seva-700 border-seva-200">
-                        {foodTypeLabels[donation.food_type] || donation.food_type}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {donation.description && (
-                        <p className="text-gray-600">{donation.description}</p>
-                      )}
-                      <div className="space-y-1 text-gray-600">
-                        <p className="flex items-center gap-2">
-                          <MapPin size={16} className="text-seva-500" />
-                          {donation.pickup_location}
-                        </p>
-                        {donation.expiry_date && (
-                          <p className="flex items-center gap-2">
-                            <Calendar size={16} className="text-seva-500" />
-                            Expires: {new Date(donation.expiry_date).toLocaleDateString()}
-                          </p>
-                        )}
-                        <p>Quantity available: {donation.quantity}</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    {isInCart(donation.id) ? (
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-red-300 text-red-600 hover:bg-red-50"
-                        onClick={() => handleRemoveFromCart(donation.id, donation.food_name)}
-                      >
-                        <X size={18} className="mr-2" />
-                        Remove from Cart
-                      </Button>
-                    ) : (
-                      <Button 
-                        className="w-full bg-seva-500 hover:bg-seva-600"
-                        onClick={() => handleAddToCart(donation)}
-                      >
-                        <ShoppingCart size={18} className="mr-2" />
-                        Add to Cart
-                      </Button>
-                    )}
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          )}
+          <FoodDonationList
+            loading={loading}
+            filteredDonations={filteredDonations}
+            foodTypeLabels={foodTypeLabels}
+            isInCart={isInCart}
+            onAddToCart={handleAddToCart}
+            onRemoveFromCart={handleRemoveFromCart}
+          />
         </section>
       </div>
       <Footer />
