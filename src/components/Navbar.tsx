@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Menu, X, User, LogOut, Home, Apple, Search, Info, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useCart } from "@/contexts/CartContext"; // We'll create this context
+import { useCart } from "@/contexts/CartContext";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -26,25 +26,25 @@ const Navbar = () => {
         </Link>
         
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link to="/" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2">
-            <Home size={20} className="text-seva-500" aria-hidden="true" />
+        <div className="hidden md:flex items-center gap-8">
+          <Link to="/" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2 text-base">
+            <Home size={22} className="text-seva-500" aria-hidden="true" />
             <span>Home</span>
           </Link>
-          <Link to="/donate-info" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2">
-            <Apple size={20} className="text-seva-500" aria-hidden="true" />
+          <Link to="/donate-info" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2 text-base">
+            <Apple size={22} className="text-seva-500" aria-hidden="true" />
             <span>Donate Food</span>
           </Link>
-          <Link to="/find" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2">
-            <Search size={20} className="text-seva-500" aria-hidden="true" />
+          <Link to="/find" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2 text-base">
+            <Search size={22} className="text-seva-500" aria-hidden="true" />
             <span>Find Food</span>
           </Link>
-          <Link to="/about" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2">
-            <Info size={20} className="text-seva-500" aria-hidden="true" />
+          <Link to="/about" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2 text-base">
+            <Info size={22} className="text-seva-500" aria-hidden="true" />
             <span>About Us</span>
           </Link>
-          <Link to="/cart" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2 relative">
-            <ShoppingCart size={20} className="text-seva-500" aria-hidden="true" />
+          <Link to="/cart" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2 text-base relative">
+            <ShoppingCart size={22} className="text-seva-500" aria-hidden="true" />
             <span>Cart</span>
             {cartItems.length > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -54,9 +54,9 @@ const Navbar = () => {
           </Link>
           
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 ml-4">
               <div className="flex items-center gap-2">
-                <User size={18} className="text-seva-500" />
+                <User size={20} className="text-seva-500" />
                 <span className="text-gray-700">
                   {user.email?.split('@')[0]}
                 </span>
@@ -71,14 +71,14 @@ const Navbar = () => {
               </Button>
             </div>
           ) : (
-            <>
+            <div className="flex items-center gap-3 ml-4">
               <Link to="/login">
                 <Button variant="outline" className="mr-2">Log In</Button>
               </Link>
               <Link to="/register">
                 <Button className="bg-seva-500 hover:bg-seva-600">Sign Up</Button>
               </Link>
-            </>
+            </div>
           )}
         </div>
         

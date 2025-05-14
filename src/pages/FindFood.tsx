@@ -66,6 +66,24 @@ const dummyFoodData = [
   }
 ];
 
+// Add dummy reservation data
+const dummyReservations = [
+  {
+    id: "r1",
+    food_donation_id: "2",
+    user_id: "user123",
+    status: "pending",
+    created_at: "2025-05-12T10:00:00Z"
+  },
+  {
+    id: "r2",
+    food_donation_id: "4",
+    user_id: "user123",
+    status: "confirmed",
+    created_at: "2025-05-13T14:30:00Z"
+  }
+];
+
 type FoodDonation = {
   id: string;
   food_name: string;
@@ -128,6 +146,7 @@ const FindFood = () => {
     setLoading(true);
     setTimeout(() => {
       setDonations(dummyFoodData);
+      setMyReservations(dummyReservations); // Set dummy reservations
       setLoading(false);
     }, 800);
   }, []);
