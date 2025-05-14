@@ -2,12 +2,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Menu, X, User, LogOut } from "lucide-react";
+import { Menu, X, User, LogOut, Home, Apple, Search, Info, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCart } from "@/contexts/CartContext"; // We'll create this context
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { cartItems } = useCart();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -25,17 +27,30 @@ const Navbar = () => {
         
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/" className="text-gray-700 hover:text-seva-500 font-medium">
-            Home
+          <Link to="/" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2">
+            <Home size={20} className="text-seva-500" aria-hidden="true" />
+            <span>Home</span>
           </Link>
-          <Link to="/donate" className="text-gray-700 hover:text-seva-500 font-medium">
-            Donate Food
+          <Link to="/donate-info" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2">
+            <Apple size={20} className="text-seva-500" aria-hidden="true" />
+            <span>Donate Food</span>
           </Link>
-          <Link to="/find" className="text-gray-700 hover:text-seva-500 font-medium">
-            Find Food
+          <Link to="/find" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2">
+            <Search size={20} className="text-seva-500" aria-hidden="true" />
+            <span>Find Food</span>
           </Link>
-          <Link to="/about" className="text-gray-700 hover:text-seva-500 font-medium">
-            About Us
+          <Link to="/about" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2">
+            <Info size={20} className="text-seva-500" aria-hidden="true" />
+            <span>About Us</span>
+          </Link>
+          <Link to="/cart" className="text-gray-700 hover:text-seva-500 font-medium flex items-center gap-2 relative">
+            <ShoppingCart size={20} className="text-seva-500" aria-hidden="true" />
+            <span>Cart</span>
+            {cartItems.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {cartItems.length}
+              </span>
+            )}
           </Link>
           
           {user ? (
@@ -68,30 +83,44 @@ const Navbar = () => {
         </div>
         
         {/* Mobile Menu Button */}
-        <button 
-          className="md:hidden text-gray-700"
-          onClick={toggleMobileMenu}
-          aria-label="Toggle Menu"
-        >
-          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="md:hidden flex items-center gap-2">
+          <Link to="/cart" className="relative mr-2">
+            <ShoppingCart size={22} className="text-gray-700" />
+            {cartItems.length > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {cartItems.length}
+              </span>
+            )}
+          </Link>
+          <button 
+            className="text-gray-700"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle Menu"
+          >
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
       
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="md:hidden absolute top-16 left-0 right-0 bg-white shadow-md py-4 px-4 z-50 animate-fade-in">
           <div className="flex flex-col space-y-4">
-            <Link to="/" className="text-gray-700 hover:text-seva-500 font-medium py-2" onClick={toggleMobileMenu}>
-              Home
+            <Link to="/" className="text-gray-700 hover:text-seva-500 font-medium py-2 flex items-center gap-2" onClick={toggleMobileMenu}>
+              <Home size={20} className="text-seva-500" aria-hidden="true" />
+              <span>Home</span>
             </Link>
-            <Link to="/donate" className="text-gray-700 hover:text-seva-500 font-medium py-2" onClick={toggleMobileMenu}>
-              Donate Food
+            <Link to="/donate-info" className="text-gray-700 hover:text-seva-500 font-medium py-2 flex items-center gap-2" onClick={toggleMobileMenu}>
+              <Apple size={20} className="text-seva-500" aria-hidden="true" />
+              <span>Donate Food</span>
             </Link>
-            <Link to="/find" className="text-gray-700 hover:text-seva-500 font-medium py-2" onClick={toggleMobileMenu}>
-              Find Food
+            <Link to="/find" className="text-gray-700 hover:text-seva-500 font-medium py-2 flex items-center gap-2" onClick={toggleMobileMenu}>
+              <Search size={20} className="text-seva-500" aria-hidden="true" />
+              <span>Find Food</span>
             </Link>
-            <Link to="/about" className="text-gray-700 hover:text-seva-500 font-medium py-2" onClick={toggleMobileMenu}>
-              About Us
+            <Link to="/about" className="text-gray-700 hover:text-seva-500 font-medium py-2 flex items-center gap-2" onClick={toggleMobileMenu}>
+              <Info size={20} className="text-seva-500" aria-hidden="true" />
+              <span>About Us</span>
             </Link>
             
             {user ? (
