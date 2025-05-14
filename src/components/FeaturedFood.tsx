@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 const FeaturedFood = () => {
   const foodItems = [
@@ -43,12 +44,12 @@ const FeaturedFood = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-16 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12 opacity-0 animate-fade-in">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Available Food Near You</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">Available Food Near You</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Browse through recently shared food items available for pickup in your area.
+            Browse free food items available for pickup in your area.
           </p>
         </div>
         
@@ -58,22 +59,26 @@ const FeaturedFood = () => {
               key={item.id} 
               className={`bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 food-card opacity-0 animate-fade-in ${index === 1 ? 'delay-1' : index === 2 ? 'delay-2' : index === 3 ? 'delay-3' : ''}`}
             >
-              <div className="h-48 overflow-hidden">
-                <img 
-                  src={item.imageUrl} 
-                  alt={item.title} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="font-semibold text-lg text-gray-800">{item.title}</h3>
-                  <span className="text-xs font-medium text-orange-500 bg-orange-50 px-2 py-1 rounded-full">
+              <div className="relative">
+                <AspectRatio ratio={16/9}>
+                  <img 
+                    src={item.imageUrl} 
+                    alt={item.title} 
+                    className="w-full h-full object-cover"
+                  />
+                </AspectRatio>
+                <div className="absolute top-0 right-0 mt-3 mr-3">
+                  <span className="text-xs font-bold text-white bg-green-500 px-3 py-1 rounded-full">
                     {item.timeLeft}
                   </span>
                 </div>
-                <p className="text-gray-600 text-sm mb-3">{item.location}</p>
-                <p className="text-gray-500 text-sm mb-4">{item.distance}</p>
+              </div>
+              <div className="p-5">
+                <h3 className="font-semibold text-xl text-gray-800 mb-2">{item.title}</h3>
+                <p className="text-gray-600 mb-1 flex items-center">
+                  <span className="mr-1">📍</span> {item.location}
+                </p>
+                <p className="text-gray-500 mb-4">{item.distance}</p>
                 
                 <div className="flex flex-wrap gap-2 mb-4">
                   {item.tags.map(tag => (
@@ -83,9 +88,11 @@ const FeaturedFood = () => {
                   ))}
                 </div>
                 
-                <Button variant="ghost" className="w-full border border-gray-200 hover:bg-seva-50 hover:text-seva-600">
-                  View Details
-                </Button>
+                <Link to="/find">
+                  <Button variant="outline" className="w-full border-2 border-green-500 text-green-600 hover:bg-green-50 text-lg">
+                    View Details
+                  </Button>
+                </Link>
               </div>
             </div>
           ))}
@@ -93,8 +100,8 @@ const FeaturedFood = () => {
         
         <div className="text-center mt-12">
           <Link to="/find">
-            <Button className="bg-seva-500 hover:bg-seva-600">
-              View All Available Food
+            <Button className="bg-green-500 hover:bg-green-600 text-lg px-8 py-6">
+              See All Available Food
             </Button>
           </Link>
         </div>

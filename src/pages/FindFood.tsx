@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { MapPin, Search, Info, Soup, Filter, Calendar, Clock } from "lucide-react";
+import { MapPin, Search, Info, Soup, Filter, Calendar, Clock, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -37,7 +37,21 @@ const FindFood = () => {
   const [foodType, setFoodType] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [activeRequests, setActiveRequests] = useState<string[]>([]);
   const itemsPerPage = 6;
+
+  // Load active requests from local storage on component mount
+  useEffect(() => {
+    const savedRequests = localStorage.getItem("activeRequests");
+    if (savedRequests) {
+      setActiveRequests(JSON.parse(savedRequests));
+    }
+  }, []);
+
+  // Save active requests to local storage whenever they change
+  useEffect(() => {
+    localStorage.setItem("activeRequests", JSON.stringify(activeRequests));
+  }, [activeRequests]);
 
   // Fetch food data with React Query
   const { data: foodItems = [], isLoading, error, refetch } = useQuery({
@@ -119,7 +133,27 @@ const FindFood = () => {
       return;
     }
     
+    setActiveRequests([...activeRequests, item.id]);
     toast.success(`Contact request sent for ${item.food_name}`);
+  };
+
+  // Cancel contact request
+  const handleCancelRequest = (itemId: string) => {
+    setActiveRequests(activeRequests.filter(id => id !== itemId));
+    toast.success("Request cancelled successfully");
+  };
+
+  // Clear search fields
+  const clearSearch = () => {
+    setSearchTerm("");
+    setLocation("");
+    setFoodType("all");
+    refetch();
+  };
+
+  // Check if item is in active requests
+  const isActiveRequest = (itemId: string) => {
+    return activeRequests.includes(itemId);
   };
 
   return (
@@ -127,43 +161,58 @@ const FindFood = () => {
       <Navbar />
       
       <div className="container mx-auto flex-grow px-4 py-8">
-        {/* Premium Hero Section */}
+        {/* Page Title - Simplified for better readability */}
         <section className="mb-8">
-          <div className="bg-gradient-to-r from-seva-500 to-purple-600 rounded-xl p-8 md:p-12 shadow-lg text-white">
-            <h1 className="text-3xl md:text-4xl font-bold mb-4">Find Available Food</h1>
+          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-xl p-6 md:p-10 shadow-lg text-white">
+            <h1 className="text-2xl md:text-3xl font-bold mb-3">Find Food Near You</h1>
             <p className="text-lg opacity-90 max-w-3xl mb-6">
-              Connect with generous donors in your community offering fresh, nutritious food. 
-              Search by location, food type, and more to find what you need.
+              Search below to find available food in your community.
             </p>
             
-            <div className="bg-white/10 backdrop-blur-sm p-6 rounded-xl">
+            <div className="bg-white/10 backdrop-blur-sm p-5 rounded-xl">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70" size={18} />
                   <Input 
                     type="text" 
-                    placeholder="Search food items" 
-                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                    placeholder="Search for food items" 
+                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 text-lg"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
+                  {searchTerm && (
+                    <button 
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white"
+                      onClick={() => setSearchTerm("")}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                 </div>
                 
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70" size={18} />
                   <Input 
                     type="text" 
-                    placeholder="Enter location or zip code" 
-                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70"
+                    placeholder="Enter your location" 
+                    className="pl-10 bg-white/20 border-white/30 text-white placeholder:text-white/70 text-lg"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                   />
+                  {location && (
+                    <button 
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/70 hover:text-white"
+                      onClick={() => setLocation("")}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
                 </div>
                 
                 <div>
                   <Select value={foodType} onValueChange={setFoodType}>
-                    <SelectTrigger className="bg-white/20 border-white/30 text-white">
-                      <SelectValue placeholder="All food types" />
+                    <SelectTrigger className="bg-white/20 border-white/30 text-white text-lg">
+                      <SelectValue placeholder="Type of food" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All food types</SelectItem>
@@ -179,8 +228,11 @@ const FindFood = () => {
                 </div>
               </div>
               
-              <div className="flex justify-end mt-4">
-                <Button onClick={() => refetch()} className="bg-white text-purple-600 hover:bg-white/90">
+              <div className="flex justify-between mt-4">
+                <Button onClick={clearSearch} variant="ghost" className="text-white border border-white/30 hover:bg-white/10">
+                  <X size={16} className="mr-1" /> Clear
+                </Button>
+                <Button onClick={() => refetch()} className="bg-white text-blue-600 hover:bg-white/90 text-lg px-6">
                   Search
                 </Button>
               </div>
@@ -188,11 +240,39 @@ const FindFood = () => {
           </div>
         </section>
         
-        {/* Results Section */}
+        {/* Active Requests Section (New) */}
+        {activeRequests.length > 0 && (
+          <section className="mb-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h2 className="text-xl font-semibold mb-3">Your Active Food Requests</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {foodItems
+                  .filter(item => activeRequests.includes(item.id))
+                  .map(item => (
+                    <div key={`request-${item.id}`} className="bg-white rounded-lg border border-blue-100 p-4 shadow-sm flex justify-between items-center">
+                      <div>
+                        <p className="font-medium text-lg">{item.food_name}</p>
+                        <p className="text-gray-600">{item.pickup_location}</p>
+                      </div>
+                      <Button 
+                        variant="destructive" 
+                        size="sm"
+                        onClick={() => handleCancelRequest(item.id)}
+                      >
+                        Cancel Request
+                      </Button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </section>
+        )}
+        
+        {/* Results Section - Simplified UI */}
         <section className="mb-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-semibold">
-              {isLoading ? "Searching..." : `${foodItems.length} Results Found`}
+            <h2 className="text-xl md:text-2xl font-semibold">
+              {isLoading ? "Searching..." : `${foodItems.length} Available Food Items`}
             </h2>
             <div className="flex items-center gap-3">
               <div className="flex border rounded-md overflow-hidden">
@@ -202,7 +282,7 @@ const FindFood = () => {
                   className="rounded-none border-0"
                   size="sm"
                 >
-                  Grid
+                  Grid View
                 </Button>
                 <Button 
                   variant={viewMode === "list" ? "default" : "outline"} 
@@ -210,7 +290,7 @@ const FindFood = () => {
                   className="rounded-none border-0"
                   size="sm"
                 >
-                  List
+                  List View
                 </Button>
               </div>
             </div>
@@ -218,11 +298,15 @@ const FindFood = () => {
           
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-seva-500"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
+              <p className="ml-3 text-lg">Finding food near you...</p>
             </div>
           ) : error ? (
-            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6">
-              An error occurred while loading food items. Please try again.
+            <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6 text-center">
+              <p className="text-lg">Sorry, we couldn't load the food items.</p>
+              <Button onClick={() => refetch()} className="mt-3">
+                Try Again
+              </Button>
             </div>
           ) : foodItems.length === 0 ? (
             <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -230,15 +314,10 @@ const FindFood = () => {
                 <Info className="text-gray-400" size={24} />
               </div>
               <h3 className="text-xl font-semibold mb-2">No food items found</h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                We couldn't find any food items matching your search criteria. Try adjusting your filters or search terms.
+              <p className="text-gray-600 mb-6 max-w-md mx-auto text-lg">
+                We couldn't find any food items matching your search. Try changing your search or check back later.
               </p>
-              <Button onClick={() => {
-                setSearchTerm("");
-                setLocation("");
-                setFoodType("all");
-                refetch();
-              }} variant="outline">
+              <Button onClick={clearSearch} variant="outline" size="lg" className="text-lg px-6">
                 Reset Search
               </Button>
             </div>
@@ -246,51 +325,62 @@ const FindFood = () => {
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {paginatedItems.map((item) => (
-                  <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300">
-                    <div className="h-3 bg-seva-500"></div>
+                  <Card key={item.id} className="overflow-hidden hover:shadow-md transition-shadow duration-300 border-2">
+                    <div className="h-3 bg-green-500"></div>
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
-                        <span className="line-clamp-1">{item.food_name}</span>
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
-                          {item.quantity} {item.quantity === 1 ? "item" : "items"} available
+                        <span className="line-clamp-1 text-xl">{item.food_name}</span>
+                        <span className="text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full">
+                          {item.quantity} {item.quantity === 1 ? "item" : "items"}
                         </span>
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-gray-600">
-                          <MapPin size={16} />
+                        <div className="flex items-center gap-2 text-gray-600 text-lg">
+                          <MapPin size={18} />
                           <span className="line-clamp-1">{item.pickup_location}</span>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4">
                           <div className="flex flex-col">
-                            <span className="text-gray-500 flex items-center gap-1 mb-1">
-                              <Calendar size={14} />Food Type
+                            <span className="text-gray-500 flex items-center gap-1 mb-1 text-sm">
+                              <Calendar size={14} />Type of Food
                             </span>
                             <span className="font-medium">{getFoodTypeLabel(item.food_type)}</span>
                           </div>
                           <div className="flex flex-col">
-                            <span className="text-gray-500 flex items-center gap-1 mb-1">
-                              <Clock size={14} />Expires
+                            <span className="text-gray-500 flex items-center gap-1 mb-1 text-sm">
+                              <Clock size={14} />Available Until
                             </span>
                             <span className="font-medium">{formatDate(item.expiry_date)}</span>
                           </div>
                         </div>
                         
                         {item.description && (
-                          <p className="text-sm text-gray-700 line-clamp-2">{item.description}</p>
+                          <p className="text-gray-700 line-clamp-2">{item.description}</p>
                         )}
                         
                         <div className="flex justify-between items-center pt-2">
-                          <span className="text-sm text-seva-600 font-medium">{getTimeSince(item.created_at)}</span>
-                          <Button 
-                            variant="outline" 
-                            className="text-seva-600 border-seva-500 hover:bg-seva-50"
-                            onClick={() => handleContact(item)}
-                          >
-                            Contact
-                          </Button>
+                          <span className="text-gray-600">{getTimeSince(item.created_at)}</span>
+                          
+                          {isActiveRequest(item.id) ? (
+                            <Button 
+                              variant="destructive" 
+                              className="text-white"
+                              onClick={() => handleCancelRequest(item.id)}
+                            >
+                              Cancel Request
+                            </Button>
+                          ) : (
+                            <Button 
+                              variant="outline" 
+                              className="text-green-600 border-green-500 hover:bg-green-50 text-lg"
+                              onClick={() => handleContact(item)}
+                            >
+                              Request Food
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -303,33 +393,43 @@ const FindFood = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Food Item</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Quantity</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>Expiry</TableHead>
-                    <TableHead>Posted</TableHead>
+                    <TableHead className="text-lg">Food Item</TableHead>
+                    <TableHead className="text-lg">Type</TableHead>
+                    <TableHead className="text-lg">Quantity</TableHead>
+                    <TableHead className="text-lg">Location</TableHead>
+                    <TableHead className="text-lg">Available Until</TableHead>
+                    <TableHead className="text-lg">Posted</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedItems.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell className="font-medium">{item.food_name}</TableCell>
+                      <TableCell className="font-medium text-lg">{item.food_name}</TableCell>
                       <TableCell>{getFoodTypeLabel(item.food_type)}</TableCell>
                       <TableCell>{item.quantity}</TableCell>
                       <TableCell className="max-w-[150px] truncate">{item.pickup_location}</TableCell>
                       <TableCell>{formatDate(item.expiry_date)}</TableCell>
                       <TableCell>{getTimeSince(item.created_at)}</TableCell>
                       <TableCell>
-                        <Button 
-                          size="sm"
-                          variant="outline" 
-                          className="text-seva-600 border-seva-500 hover:bg-seva-50"
-                          onClick={() => handleContact(item)}
-                        >
-                          Contact
-                        </Button>
+                        {isActiveRequest(item.id) ? (
+                          <Button 
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleCancelRequest(item.id)}
+                          >
+                            Cancel
+                          </Button>
+                        ) : (
+                          <Button 
+                            size="sm"
+                            variant="outline" 
+                            className="text-green-600 border-green-500 hover:bg-green-50"
+                            onClick={() => handleContact(item)}
+                          >
+                            Request
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -338,7 +438,7 @@ const FindFood = () => {
             </div>
           )}
           
-          {/* Pagination */}
+          {/* Pagination - Simplified */}
           {totalPages > 1 && (
             <Pagination className="justify-center">
               <PaginationContent>
@@ -346,53 +446,51 @@ const FindFood = () => {
                   <PaginationPrevious 
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
+                  >
+                    Previous Page
+                  </PaginationPrevious>
                 </PaginationItem>
                 
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <PaginationItem key={page}>
-                    <PaginationLink 
-                      isActive={page === currentPage}
-                      onClick={() => setCurrentPage(page)}
-                      className="cursor-pointer"
-                    >
-                      {page}
-                    </PaginationLink>
-                  </PaginationItem>
-                ))}
+                {/* Show current page of total */}
+                <PaginationItem>
+                  <span className="px-4 py-2 text-lg">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                </PaginationItem>
                 
                 <PaginationItem>
                   <PaginationNext 
                     onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                     className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
+                  >
+                    Next Page
+                  </PaginationNext>
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           )}
         </section>
         
-        {/* Emergency Food Assistance Section */}
+        {/* Emergency Food Assistance Section - Simplified */}
         <section className="mb-12">
-          <div className="bg-orange-50 p-6 rounded-lg border border-orange-200">
+          <div className="bg-orange-50 p-6 rounded-lg border-2 border-orange-200">
             <div className="flex flex-col md:flex-row gap-4 items-start">
               <div className="bg-orange-100 p-3 rounded-full mt-1">
                 <Info className="text-orange-600" size={24} />
               </div>
               <div>
-                <h3 className="font-semibold text-lg mb-2">Need Immediate Food Assistance?</h3>
-                <p className="text-gray-700 mb-4 max-w-3xl">
-                  If you need immediate food assistance, please contact our emergency helpline 
-                  or visit the nearest food bank. We're here to help you connect with resources
-                  in your community.
+                <h3 className="font-semibold text-xl mb-2">Need Help Right Away?</h3>
+                <p className="text-gray-700 mb-4 max-w-3xl text-lg">
+                  If you need immediate food help, please call our helpline or find a food bank near you. 
+                  We're here to help connect you with resources in your community.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Button className="bg-orange-500 hover:bg-orange-600">
+                  <Button className="bg-orange-500 hover:bg-orange-600 text-lg">
                     <Soup className="mr-2" size={18} />
-                    Get Emergency Assistance
+                    Get Emergency Help
                   </Button>
-                  <Button variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-50">
-                    Find Food Banks Near You
+                  <Button variant="outline" className="border-orange-200 text-orange-700 hover:bg-orange-50 text-lg">
+                    Find Food Banks
                   </Button>
                 </div>
               </div>
